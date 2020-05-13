@@ -38,26 +38,7 @@ def draw_board(screen: Surface, pos_x: int, pos_y: int, elem_size: int, board: B
 
 def game_loop(screen: Surface, board: BoardState, ai: AI):
     grid_size = screen.get_size()[0] // 8
-    f = open("src/board.txt", 'r')
-
-    import os
-    if os.path.getsize('src/board.txt') == 0:
-        board.initial_state()
-    else:
-        for y in range(8):
-            s = f.readline()
-            for x in range(8):
-                if s[x] == '1':
-                    board.board[y, x] = 1
-                if s[x] == '2':
-                    board.board[y, x] = 2
-                if s[x] == '0':
-                    board.board[y, x] = 0
-                if s[x] == '3':
-                    board.board[y, x] = -1
-                if s[x] == '4':
-                    board.board[y, x] = -2
-    f.close()
+    board.load()
 
 
     while True:
@@ -109,21 +90,7 @@ def game_loop(screen: Surface, board: BoardState, ai: AI):
                     board = board.inverted()
 
                 if event.key == pygame.K_s:
-                    f = open("src/board.txt", 'w')
-                    for y in range(8):
-                        for x in range(8):
-                            if board.board[y, x] == 1:
-                                f.write('1')
-                            if board.board[y, x] == 2:
-                                f.write('2')
-                            if board.board[y, x] == 0:
-                                f.write('0')
-                            if board.board[y, x] == -1:
-                                f.write('3')
-                            if board.board[y, x] == -2:
-                                f.write('4')
-                        f.write('\n')
-                    f.close()
+                    board.save()
                     return
 
                 if event.key == pygame.K_q:
