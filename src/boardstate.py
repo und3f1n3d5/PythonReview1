@@ -5,7 +5,7 @@ BDAME = -2
 WDAME = 2
 BLACK = -1
 WHITE = 1
-
+desk = {'0':0, '1':1, '2':2, '3':-1, '4':-2}
 
 class BoardState:
     moves = []
@@ -14,6 +14,36 @@ class BoardState:
     def __init__(self, board: np.ndarray, current_player: int = 1):
         self.board: np.ndarray = board
         self.current_player: int = current_player
+
+    def save(self):
+        f = open("src/board.txt", 'w')
+        for y in range(8):
+            for x in range(8):
+                if self.board[y, x] == 1:
+                    f.write('1')
+                if self.board[y, x] == 2:
+                    f.write('2')
+                if self.board[y, x] == 0:
+                    f.write('0')
+                if self.board[y, x] == -1:
+                    f.write('3')
+                if self.board[y, x] == -2:
+                    f.write('4')
+            f.write('\n')
+        f.close()
+
+    def load(self):
+        f = open("src/board.txt", 'r')
+
+        import os
+        if os.path.getsize('src/board.txt') == 0:
+            self.initial_state()
+        else:
+            for y in range(8):
+                s = f.readline()
+                for x in range(8):
+                    self.board[y, x] = desk[s[x]]
+        f.close()
 
     def change_player(self):
         self.current_player *= -1
@@ -166,7 +196,7 @@ class BoardState:
                 return None
         return result
 
-    def move_white(self, x, y, juat_moves):
+    def move_white(self, x, y, just_moves):
         if x + 1 < 8 and y - 1 > -1 and self.board[y - 1, x + 1] == 0:
             state = self.copy()
             state.board[y - 1, x + 1] = state.board[y, x]
@@ -181,7 +211,7 @@ class BoardState:
                 state.board[y - 1, x - 1] += 1
             state.board[y, x] = 0
             just_moves.append(state)
-    
+
     def move_black(self, x, y, just_moves):
         if x + 1 < 8 and y + 1 < 8 and self.board[y + 1, x + 1] == 0:
             state = self.copy()
@@ -240,7 +270,7 @@ class BoardState:
                 self.board[y, x] == BDAME and self.current_player == -1):
             self.move_with_dame(x, y, just_moves)
         return just_moves
-    
+
     def eat_with_usual(self, x, y, ai_bites, n):
         m = True
         if x + 2 < 8 and y + 2 < 8 and self.board[y + 1, x + 1] * self.current_player < 0 and self.board[
@@ -297,7 +327,7 @@ class BoardState:
             self.board[y - 2, x - 2] = 0
         if m and n > 0:
             ai_bites.append(self.copy())
-            
+
     def eat_with_dame(self, x, y, ai_bites, n):
         m = True
         i = 1
