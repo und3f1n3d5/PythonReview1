@@ -177,8 +177,8 @@ def dfsGenerator(starter):
 
 
 def showRoute(matrix, way):
-    for m in range(len(way)):
-        matrix[way[m][0]][way[m][1]].routeMark()  # marking the route
+    for elem in way:
+        matrix[elem[0]][elem[1]].routeMark()  # marking the route
     print(" _ " * len(matrix[0]))
     for m in range(len(matrix)):
         for k in range(len(matrix[m])):
@@ -195,9 +195,9 @@ std = sys.stdout
 f.seek(0)
 sys.stdout = f
 print(" _ " * len(labyrinth[0]))
-for i in range(len(labyrinth)):
-    for j in range(len(labyrinth[i])):
-        print(labyrinth[i][j], end="")
+for line in labyrinth:
+    for elem in line:
+        print(elem, end="")
     print()
 f.close()
 f = open("labirynth.txt", "r")
