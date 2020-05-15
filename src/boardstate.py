@@ -6,6 +6,7 @@ WDAME = 2
 BLACK = -1
 WHITE = 1
 desk = {'0':0, '1':1, '2':2, '3':-1, '4':-2}
+desk1 = {0:'0', 1:'1', 2:'2', -1:'3', -2:'4'}
 
 class BoardState:
     moves = []
@@ -19,16 +20,7 @@ class BoardState:
         f = open("src/board.txt", 'w')
         for y in range(8):
             for x in range(8):
-                if self.board[y, x] == 1:
-                    f.write('1')
-                if self.board[y, x] == 2:
-                    f.write('2')
-                if self.board[y, x] == 0:
-                    f.write('0')
-                if self.board[y, x] == -1:
-                    f.write('3')
-                if self.board[y, x] == -2:
-                    f.write('4')
+                f.write(desk1[self.board[y, x]])
             f.write('\n')
         f.close()
 
