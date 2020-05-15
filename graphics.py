@@ -15,33 +15,31 @@ def draw_board():
     labirinth = f.readlines()
     screen = pygame.display.set_mode((900, 900))
     height = 800 // len(labirinth)
-    length = 800 // len(labirinth[0])
+    width = 800 // len(labirinth[0])
     x = 10
     y = 10
     for line in labirinth:
-        for j in range(len(line)):
-            i = line[j]
-            if i == "_":
-                pygame.draw.aaline(screen, WHITE, [x - length, y + height], [min(800, x + 2 * length), y + height])
-            if i == "|":
-                if j < len(line) - 1 and line[j + 1] == '|':
-                    pygame.draw.aaline(screen, WHITE, [x, y + height], [min(800, x + length), y + height])
-                    pygame.draw.aaline(screen, WHITE, [x, y], [min(800, x + length), y])
-                if j == len(line) - 2:
-                    pygame.draw.aaline(screen, WHITE, [x + length, y], [x + length, y + height])
+        for j in enumerate(line):
+            if j[1]== "_":
+                pygame.draw.aaline(screen, WHITE, [x - width, y + height], [min(800, x + 2 * width), y + height])
+            if j[1]== "|":
+                if j[0] < len(line) - 1 and line[j + 1] == '|':
+                    pygame.draw.aaline(screen, WHITE, [x, y + height], [min(800, x + width), y + height])
+                    pygame.draw.aaline(screen, WHITE, [x, y], [min(800, x + width), y])
+                if j[0] == len(line) - 2:
+                    pygame.draw.aaline(screen, WHITE, [x + width, y], [x + width, y + height])
                 else:
                     pygame.draw.aaline(screen, WHITE, [x, y], [x, y + height])
-            if i == "#":
-                pygame.draw.circle(screen, GREEN, (x, y + height // 2), 2 * length // 3)
-            if i == "!":
-                pygame.draw.circle(screen, RED, (x, y + height // 2), 2 * length // 3, length // 4)
-            if i == "*":
-                pygame.draw.circle(screen, YELLOW, (x - length // 3, y + height // 2), length // 5)
-            if i == "\u0332":
-                pygame.draw.aaline(screen, WHITE, [x - length, y + height], [min(800, x + 2*length), y + height])
-                x -= length
-            x += length
+            if j[1] == "#":
+                pygame.draw.circle(screen, GREEN, (x, y + height // 2), 2 * width // 3)
+            if j[1] == "!":
+                pygame.draw.circle(screen, RED, (x, y + height // 2), 2 * width // 3, width // 4)
+            if j[1] == "*":
+                pygame.draw.circle(screen, YELLOW, (x - width // 3, y + height // 2), width // 5)
+            if j[1] == "\u0332":
+                pygame.draw.aaline(screen, WHITE, [x - width, y + height], [min(800, x + 2*width), y + height])
+                x -= width
+            x += width
         x = 10
         y += height
     pygame.display.update()
-
