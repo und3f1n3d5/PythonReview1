@@ -1,7 +1,6 @@
 import random
 from collections import namedtuple
 from enum import Enum
-from queue import Queue
 import sys
 import graphics
 import pygame
@@ -14,10 +13,13 @@ GREEN = (0, 200, 64)
 YELLOW = (225, 225, 0)
 RED = (230, 50, 130)
 
-UP = 0
-DOWN = 1
-LEFT = 2
-RIGHT = 3
+
+class Go(Enum):
+    UP = 0
+    DOWN = 1
+    LEFT = 2
+    RIGHT = 3
+
 
 Coord = namedtuple('Coord', 'x y')
 Element = namedtuple('Element', 'x y direction')
@@ -101,13 +103,13 @@ def checkBack(matrix, stack):
         cur = random.choice(
             [el for el in getNeighbours(cur, matrix) if not el[0].is_visited])
         matrix[cur[1]][cur[2]].is_visited = True
-        if cur[3] == LEFT:
+        if cur[3] == Go.LEFT:
             last[0].deleteLeft()
             cur[0].deleteRight()
-        elif cur[3] == RIGHT:
+        elif cur[3] == Go.RIGHT:
             last[0].deleteRight()
             cur[0].deleteLeft()
-        elif cur[3] == DOWN:
+        elif cur[3] == Go.DOWN:
             last[0].deleteLower()
         else:
             cur[0].deleteLower()
@@ -119,13 +121,13 @@ def generateRoute(cur, matrix, stack, way):
         last = cur
         cur = random.choice([el for el in getNeighbours(cur, matrix) if not el[0].is_visited])
         matrix[cur[1]][cur[2]].is_visited = True
-        if cur[3] == LEFT:
+        if cur[3] == Go.LEFT:
             last[0].deleteLeft()
             cur[0].deleteRight()
-        elif cur[3] == RIGHT:
+        elif cur[3] == Go.RIGHT:
             last[0].deleteRight()
             cur[0].deleteLeft()
-        elif cur[3] == DOWN:
+        elif cur[3] == Go.DOWN:
             last[0].deleteLower()
         else:
             cur[0].deleteLower()
@@ -138,16 +140,16 @@ def getNeighbours(current, matrix):
     y = current[2]
     neighbours = []
     if x > 0:
-        up_de = DetailedElement(matrix_element=matrix[x - 1][y], x=x - 1, y=y, direction=UP)
+        up_de = DetailedElement(matrix_element=matrix[x - 1][y], x=x - 1, y=y, direction=Go.UP)
         neighbours.append(up_de)
     if x < len(matrix) - 1:
-        down_de = DetailedElement(matrix_element=matrix[x + 1][y], x=x + 1, y=y, direction=DOWN)
+        down_de = DetailedElement(matrix_element=matrix[x + 1][y], x=x + 1, y=y, direction=Go.DOWN)
         neighbours.append(down_de)
     if y > 0:
-        left_de = DetailedElement(matrix_element=matrix[x][y - 1], x=x, y=y - 1, direction=LEFT)
+        left_de = DetailedElement(matrix_element=matrix[x][y - 1], x=x, y=y - 1, direction=Go.LEFT)
         neighbours.append(left_de)
     if y < len(matrix[0]) - 1:
-        right_de = DetailedElement(matrix_element=matrix[x][y + 1], x=x, y=y + 1, direction=RIGHT)
+        right_de = DetailedElement(matrix_element=matrix[x][y + 1], x=x, y=y + 1, direction=Go.RIGHT)
         neighbours.append(right_de)
     return neighbours
 
