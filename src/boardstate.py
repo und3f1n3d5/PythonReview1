@@ -5,8 +5,9 @@ BDAME = -2
 WDAME = 2
 BLACK = -1
 WHITE = 1
-desk = {'0':0, '1':1, '2':2, '3':-1, '4':-2}
-desk1 = {0:'0', 1:'1', 2:'2', -1:'3', -2:'4'}
+desk = {'0': 0, '1': 1, '2': 2, '3': -1, '4': -2}
+desk1 = {0: '0', 1: '1', 2: '2', -1: '3', -2: '4'}
+
 
 class BoardState:
     moves = []
@@ -51,22 +52,25 @@ class BoardState:
         self.to_eat = [[], [], [], []]
         if abs(self.board[y, x]) == 1:
             i = 2
-            if y + i < 8 and x + i < 8 and self.board[y + 1, x + 1] * self.current_player < 0 and self.board[
-                y + 2, x + 2] == 0:
-                self.moves.append([y + 2, x + 2])
-                self.to_eat[0] = [y + 1, x + 1]
-            elif y - i > -1 and x + i < 8 and self.board[y - 1, x + 1] * self.current_player < 0 and self.board[
-                y - 2, x + 2] == 0:
-                self.moves.append([y - 2, x + 2])
-                self.to_eat[1] = [y - 1, x + 1]
-            elif y + i < 8 and x - i > -1 and self.board[y + 1, x - 1] * self.current_player < 0 and self.board[
-                y + 2, x - 2] == 0:
-                self.moves.append([y + 2, x - 2])
-                self.to_eat[3] = [y + 1, x - 1]
-            elif y - i > -1 and x - i > -1 and self.board[y - 1, x - 1] * self.current_player < 0 and self.board[
-                y - 2, x - 2] == 0:
-                self.moves.append([y - 2, x - 2])
-                self.to_eat[2] = [y - 1, x - 1]
+            mvs = [[2, 2], [-2, 2], [-2, -2], [2, -2]]
+            for mv in enumerate(mvs):
+                i, j = mv[1][0], mv[1][1]
+                if y + i < 8 and x + j < 8 and self.board[y + i // 2, x + j // 2] * self.current_player < 0 and self.board[
+                    y + i, x + j] == 0:
+                    self.moves.append([y + i, x + j])
+                    self.to_eat[mv[0]] = [y + i // 2, x + i // 2]
+            # elif y - i > -1 and x + i < 8 and self.board[y - 1, x + 1] * self.current_player < 0 and self.board[
+            #     y - 2, x + 2] == 0:
+            #     self.moves.append([y - 2, x + 2])
+            #     self.to_eat[1] = [y - 1, x + 1]
+            # elif y + i < 8 and x - i > -1 and self.board[y + 1, x - 1] * self.current_player < 0 and self.board[
+            #     y + 2, x - 2] == 0:
+            #     self.moves.append([y + 2, x - 2])
+            #     self.to_eat[3] = [y + 1, x - 1]
+            # elif y - i > -1 and x - i > -1 and self.board[y - 1, x - 1] * self.current_player < 0 and self.board[
+            #     y - 2, x - 2] == 0:
+            #     self.moves.append([y - 2, x - 2])
+            #     self.to_eat[2] = [y - 1, x - 1]
         else:
             i = 1
             while y + i < 8 and x + i < 8 and self.board[y + i, x + i] * self.current_player >= 0 and self.board[
@@ -400,14 +404,13 @@ class BoardState:
                         j_moves = self.ai_move(x, y)
                         for i in j_moves:
                             just_moves.append(i)
-        #self.ai_eat(7, 2, ai_bites)
+        # self.ai_eat(7, 2, ai_bites)
         if len(ai_bites) != 0:
             return ai_bites
         return just_moves
 
     @property
     def is_game_finished(self) -> bool:
-        res = False
         k = self.get_possible_moves()
         res = (len(k) == 0)
         if not res:
@@ -426,7 +429,7 @@ class BoardState:
     @staticmethod
     def initial_state() -> 'BoardState':
         board = np.zeros(shape=(8, 8), dtype=np.int8)
-        # дамка = 2, шашка = 1, черные = -1
+        # дамка = 2, шашка = 1, черные = -1 и -2
         for i in range(7, 4, -1):
             for j in range((i + 1) % 2, 8, 2):
                 board[i, j] = 1
