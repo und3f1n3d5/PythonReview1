@@ -96,20 +96,7 @@ def game_loop(screen: Surface, board: BoardState, ai: AI):
                 if event.key == pygame.K_q:
                     board.initial_state()
                     f = open("src/__init__.py", 'w')
-                    for y in range(8):
-                        for x in range(8):
-                            if board.board[y, x] == 1:
-                                f.write('1')
-                            if board.board[y, x] == 2:
-                                f.write('2')
-                            if board.board[y, x] == 0:
-                                f.write('0')
-                            if board.board[y, x] == -1:
-                                f.write('3')
-                            if board.board[y, x] == -2:
-                                f.write('4')
-                        f.write('\n')
-                    f.close()
+                    board.save()
 
                 if event.key == pygame.K_SPACE and board.current_player == AI_color:
                     if board.current_player == AI_color:
