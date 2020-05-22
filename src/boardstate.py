@@ -52,25 +52,12 @@ class BoardState:
         self.to_eat = [[], [], [], []]
         if abs(self.board[y, x]) == 1:
             i = 2
-            mvs = [[2, 2], [-2, 2], [-2, -2], [2, -2]]
-            for mv in enumerate(mvs):
-                i, j = mv[1][0], mv[1][1]
+            mvs = [[0, 2, 2], [1, -2, 2], [2, -2, -2], [3, 2, -2]]
+            for k, i, j in mvs:
                 if y + i < 8 and x + j < 8 and self.board[y + i // 2, x + j // 2] * self.current_player < 0 and self.board[
                     y + i, x + j] == 0:
                     self.moves.append([y + i, x + j])
-                    self.to_eat[mv[0]] = [y + i // 2, x + i // 2]
-            # elif y - i > -1 and x + i < 8 and self.board[y - 1, x + 1] * self.current_player < 0 and self.board[
-            #     y - 2, x + 2] == 0:
-            #     self.moves.append([y - 2, x + 2])
-            #     self.to_eat[1] = [y - 1, x + 1]
-            # elif y + i < 8 and x - i > -1 and self.board[y + 1, x - 1] * self.current_player < 0 and self.board[
-            #     y + 2, x - 2] == 0:
-            #     self.moves.append([y + 2, x - 2])
-            #     self.to_eat[3] = [y + 1, x - 1]
-            # elif y - i > -1 and x - i > -1 and self.board[y - 1, x - 1] * self.current_player < 0 and self.board[
-            #     y - 2, x - 2] == 0:
-            #     self.moves.append([y - 2, x - 2])
-            #     self.to_eat[2] = [y - 1, x - 1]
+                    self.to_eat[k] = [y + i // 2, x + i // 2]
         else:
             i = 1
             while y + i < 8 and x + i < 8 and self.board[y + i, x + i] * self.current_player >= 0 and self.board[
