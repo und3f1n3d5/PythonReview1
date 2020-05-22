@@ -51,46 +51,23 @@ class BoardState:
         self.moves = []
         self.to_eat = [[], [], [], []]
         if abs(self.board[y, x]) == 1:
-            i = 2
             mvs = [[0, 2, 2], [1, -2, 2], [2, -2, -2], [3, 2, -2]]
             for k, i, j in mvs:
-                if y + i < 8 and x + j < 8 and self.board[y + i // 2, x + j // 2] * self.current_player < 0 and self.board[
-                    y + i, x + j] == 0:
+                if y + i < 8 and x + j < 8 and self.board[y + i // 2, x + j // 2] \
+                        * self.current_player < 0 and self.board[y + i, x + j] == 0:
                     self.moves.append([y + i, x + j])
                     self.to_eat[k] = [y + i // 2, x + i // 2]
         else:
-            i = 1
-            while y + i < 8 and x + i < 8 and self.board[y + i, x + i] * self.current_player >= 0 and self.board[
-                y + i, x + i] == 0:
-                i += 1
-            if y + i < 7 and x + i < 7 and self.board[y + i, x + i] * self.current_player < 0 and self.board[
-                y + i + 1, x + i + 1] == 0:
-                self.moves.append([y + i + 1, x + i + 1])
-                self.to_eat[0] = [y + i, x + i]
-            i = 1
-            while y - i > -1 and x + i < 8 and self.board[y - i, x + i] * self.current_player >= 0 and self.board[
-                y - i, x + i] == 0:
-                i += 1
-            if y - i > 0 and x + i < 7 and self.board[y - i, x + i] * self.current_player < 0 and self.board[
-                y - i - 1, x + i + 1] == 0:
-                self.moves.append([y - i - 1, x + i + 1])
-                self.to_eat[1] = [y - i, x + i]
-            i = 1
-            while y + i < 8 and x - i > -1 and self.board[y + i, x - i] * self.current_player >= 0 and self.board[
-                y + i, x - i] == 0:
-                i += 1
-            if y + i < 7 and x - i > 0 and self.board[y + i, x - i] * self.current_player < 0 and self.board[
-                y + i + 1, x - i - 1] == 0:
-                self.moves.append([y + i + 1, x - i - 1])
-                self.to_eat[3] = [y + i, x - i]
-            i = 1
-            while y - i > -1 and x - i > -1 and self.board[y - i, x - i] * self.current_player >= 0 and self.board[
-                y - i, x - i] == 0:
-                i += 1
-            if y - i > 0 and x - i > 0 and self.board[y - i, x - i] * self.current_player < 0 and self.board[
-                y - i - 1, x - i - 1]:
-                self.moves.append([y - i - 1, x - i - 1])
-                self.to_eat[2] = [y - i, x - i]
+            mvs = [[0, 1, 1], [1, -1, 1], [2, 1, -1], [3, -1, -1]]
+            for k, dx, dy in mvs:
+                i = 1
+                while y + dy * i < 8 and x + dx * i < 8 and self.board[y + dy * i, x + dx * i] \
+                        * self.current_player >= 0 and self.board[y + dy * i, x + dx * i] == 0:
+                    i += 1
+                if y + i * dy < 7 and x + i * dx < 7 and self.board[y + i * dy, x + i * dx] \
+                        * self.current_player < 0 and self.board[y + (i + 1) * dy, x + (i + 1) * dx] == 0:
+                    self.moves.append([y + (i + 1) * dy, x + (i + 1) * dx])
+                    self.to_eat[0] = [y + i * dy, x + i * dx]
 
     def eat_up(self, from_x, from_y, to_x, to_y):
         if [to_y, to_x] in self.moves:
