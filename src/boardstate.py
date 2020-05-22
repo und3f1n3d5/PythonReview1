@@ -103,34 +103,14 @@ class BoardState:
 
         if self.board[from_y, from_x] == WDAME or self.board[from_y, from_x] == BDAME:
             result = self.copy()
-            if from_y < to_y and from_x < to_x:
-                x, y = from_x, from_y
-                while x != to_x:
-                    x += 1
-                    y += 1
-                    if self.board[y, x] != 0:
-                        return None
-            if from_y > to_y and from_x < to_x:
-                x, y = from_x, from_y
-                while x != to_x:
-                    x += 1
-                    y -= 1
-                    if self.board[y, x] != 0:
-                        return None
-            if from_y < to_y and from_x > to_x:
-                x, y = from_x, from_y
-                while x != to_x:
-                    x -= 1
-                    y += 1
-                    if self.board[y, x] != 0:
-                        return None
-            if from_y > to_y and from_x > to_x:
-                x, y = from_x, from_y
-                while x != to_x:
-                    x -= 1
-                    y -= 1
-                    if self.board[y, x] != 0:
-                        return None
+            dx = 1 if to_x > from_x else -1
+            dy = 1 if to_y > from_y else -1
+            x, y = from_x, from_y
+            while x != to_x:
+                x += dx
+                y += dy
+                if self.board[y, x] != 0:
+                    return None
             result.board[to_y, to_x] = result.board[from_y, from_x]
             result.board[from_y, from_x] = 0
         else:
@@ -157,68 +137,37 @@ class BoardState:
         return result
 
     def move_white(self, x, y, just_moves):
-        if x + 1 < 8 and y - 1 > -1 and self.board[y - 1, x + 1] == 0:
-            state = self.copy()
-            state.board[y - 1, x + 1] = state.board[y, x]
-            if y == 1:
-                state.board[y - 1, x + 1] += 1
-            state.board[y, x] = 0
-            just_moves.append(state)
-        if x - 1 > -1 and y - 1 > -1 and self.board[y - 1, x - 1] == 0:
-            state = self.copy()
-            state.board[y - 1, x - 1] = state.board[y, x]
-            if y == 1:
-                state.board[y - 1, x - 1] += 1
-            state.board[y, x] = 0
-            just_moves.append(state)
+        for dx in (-1, 1):
+            if 8 > x + dx > -1 and y - 1 > -1 and self.board[y - 1, x + dx] == 0:
+                state = self.copy()
+                state.board[y - 1, x + dx] = state.board[y, x]
+                if y == 1:
+                    state.board[y - 1, x + dx] += 1
+                state.board[y, x] = 0
+                just_moves.append(state)
 
     def move_black(self, x, y, just_moves):
-        if x + 1 < 8 and y + 1 < 8 and self.board[y + 1, x + 1] == 0:
-            state = self.copy()
-            state.board[y + 1, x + 1] = state.board[y, x]
-            if y == 6:
-                state.board[y + 1, x + 1] -= 1
-            state.board[y, x] = 0
-            just_moves.append(state)
-        if x - 1 > -1 and y + 1 < 8 and self.board[y + 1, x - 1] == 0:
-            state = self.copy()
-            state.board[y + 1, x - 1] = state.board[y, x]
-            if y == 6:
-                state.board[y + 1, x - 1] -= 1
-            state.board[y, x] = 0
-            just_moves.append(state)
+        for dx in (-1, 1):
+            if 8 > x + dx > -1 and y + 1 < 8 and self.board[y + 1, x + dx] == 0:
+                state = self.copy()
+                state.board[y + 1, x + dx] = state.board[y, x]
+                if y == 6:
+                    state.board[y + 1, x + dx] += 1
+                state.board[y, x] = 0
+                just_moves.append(state)
 
     def move_with_dame(self, x, y, just_moves):
-        x1 = x
-        y1 = y
-        while x1 + 1 < 8 and y1 + 1 < 8 and self.board[y1 + 1, x1 + 1] == 0:
-            x1 += 1
-            y1 += 1
-            state = self.copy()
-            state.board[y1, x1] = state.board[y, x]
-            state.board[y, x] = 0
-            just_moves.append(state)
-        while x1 - 1 > -1 and y1 + 1 < 8 and self.board[y1 + 1, x1 - 1] == 0:
-            x1 -= 1
-            y1 += 1
-            state = self.copy()
-            state.board[y1, x1] = state.board[y, x]
-            state.board[y, x] = 0
-            just_moves.append(state)
-        while x1 + 1 < 8 and y1 - 1 > -1 and self.board[y1 - 1, x1 + 1] == 0:
-            x1 += 1
-            y1 -= 1
-            state = self.copy()
-            state.board[y1, x1] = state.board[y, x]
-            state.board[y, x] = 0
-            just_moves.append(state)
-        while x1 - 1 > -1 and y1 - 1 > -1 and self.board[y1 - 1, x1 - 1] == 0:
-            x1 -= 1
-            y1 -= 1
-            state = self.copy()
-            state.board[y1, x1] = state.board[y, x]
-            state.board[y, x] = 0
-            just_moves.append(state)
+        mv = [[1, 1], [-1, -1], [-1, 1], [1, -1]]
+        for dx, dy in mv:
+            x1 = x
+            y1 = y
+            while -1 < x1 + dx < 8 and -1 < y1 + dy < 8 and self.board[y1 + dy, x1 + dx] == 0:
+                x1 += dx
+                y1 += dy
+                state = self.copy()
+                state.board[y1, x1] = state.board[y, x]
+                state.board[y, x] = 0
+                just_moves.append(state)
 
     def ai_move(self, x, y):
         just_moves = []
@@ -233,119 +182,44 @@ class BoardState:
 
     def eat_with_usual(self, x, y, ai_bites, n):
         m = True
-        if x + 2 < 8 and y + 2 < 8 and self.board[y + 1, x + 1] * self.current_player < 0 and self.board[
-            y + 2, x + 2] == 0:
-            m = False
-            self.board[y + 2, x + 2] = self.board[y, x]
-            self.board[y, x] = 0
-            k = self.board[y + 1, x + 1]
-            self.board[y + 1, x + 1] = 0
-            if y + 2 == 7 and k == WHITE:
-                self.board[y + 2, x + 2] -= 1
-            self.ai_eat(x + 2, y + 2, ai_bites, n + 1)
-            self.board[y, x] = self.board[y + 2, x + 2]
-            self.board[y + 1, x + 1] = k
-            self.board[y + 2, x + 2] = 0
-        if x + 2 < 8 and y - 2 > -1 and self.board[y - 1, x + 1] * self.current_player < 0 and self.board[
-            y - 2, x + 2] == 0:
-            m = False
-            self.board[y - 2, x + 2] = self.board[y, x]
-            self.board[y, x] = 0
-            k = self.board[y - 1, x + 1]
-            self.board[y - 1, x + 1] = 0
-            if y - 2 == 0 and k == BLACK:
-                self.board[y - 2, x + 2] += 1
-            self.ai_eat(x + 2, y - 2, ai_bites, n + 1)
-            self.board[y - 1, x + 1] = k
-            self.board[y, x] = self.board[y - 2, x + 2]
-            self.board[y - 2, x + 2] = 0
-        if x - 2 > -1 and y + 2 < 8 and self.board[y + 1, x - 1] * self.current_player < 0 and self.board[
-            y + 2, x - 2] == 0:
-            m = False
-            self.board[y + 2, x - 2] = self.board[y, x]
-            self.board[y, x] = 0
-            k = self.board[y + 1, x - 1]
-            self.board[y + 1, x - 1] = 0
-            if y + 2 == 7 and k == WHITE:
-                self.board[y + 2, x - 2] -= 1
-            self.ai_eat(x - 2, y + 2, ai_bites, n + 1)
-            self.board[y + 1, x - 1] = k
-            self.board[y, x] = self.board[y + 2, x - 2]
-            self.board[y + 2, x - 2] = 0
-        if x - 2 > -1 and y - 2 > -1 and self.board[y - 1, x - 1] * self.current_player < 0 and self.board[
-            y - 2, x - 2] == 0:
-            m = False
-            self.board[y - 2, x - 2] = self.board[y, x]
-            self.board[y, x] = 0
-            k = self.board[y - 1, x - 1]
-            self.board[y - 1, x - 1] = 0
-            if y - 2 == 0 and k == BLACK:
-                self.board[y - 2, x - 2] += 1
-            self.ai_eat(x - 2, y - 2, ai_bites, n + 1)
-            self.board[y - 1, x - 1] = k
-            self.board[y, x] = self.board[y - 2, x - 2]
-            self.board[y - 2, x - 2] = 0
+        mv = [[2, 2], [-2, -2], [-2, 2], [2, -2]]
+        for dx, dy in mv:
+            if -1 < x + dx < 8 and -1 < y + dy < 8 and self.board[y + dy/2, x + dx/2]\
+                    * self.current_player < 0 and self.board[y + dy, x + dx] == 0:
+                m = False
+                self.board[y + dy, x + dx] = self.board[y, x]
+                self.board[y, x] = 0
+                k = self.board[y + dy/2, x + dx/2]
+                self.board[y + dy/2, x + dx/2] = 0
+                if y + dy == 7 and k == WHITE:
+                    self.board[y + dy, x + dx] -= 1
+                if y + dy == 0 and k == BLACK:
+                    self.board[y + dy, x + dx] += 1
+                self.ai_eat(y + dy, x + dx, ai_bites, n + 1)
+                self.board[y, x] = self.board[y + 2, x + 2]
+                self.board[y + dy/2, x + dx/2] = k
+                self.board[y + dy, x + dx] = 0
         if m and n > 0:
             ai_bites.append(self.copy())
 
     def eat_with_dame(self, x, y, ai_bites, n):
         m = True
-        i = 1
-        while x + i < 8 and y + i < 8 and self.board[y + i, x + i] == 0:
-            i += 1
-        if x + i < 7 and y + i < 7 and self.board[y + i, x + i] * self.current_player < 0:
-            if self.board[y + i + 1, x + i + 1] == 0:
-                m = False
-                self.board[y + i + 1, x + i + 1] = self.board[y, x]
-                self.board[y, x] = 0
-                k = self.board[y + i, x + i]
-                self.board[y + i, x + i] = 0
-                self.ai_eat(x + i + 1, y + i + 1, ai_bites, n + 1)
-                self.board[y, x] = self.board[y + i + 1, x + i + 1]
-                self.board[y + i, x + i] = k
-                self.board[y + i + 1, x + i + 1] = 0
-        i = 1
-        while x - i > -1 and y + i < 8 and self.board[y + i, x - i] == 0:
-            i += 1
-        if x - i > 0 and y + i < 7 and self.board[y + i, x - i] * self.current_player < 0:
-            if self.board[y + i + 1, x - i - 1] == 0:
-                m = False
-                self.board[y + i + 1, x - i - 1] = self.board[y, x]
-                self.board[y, x] = 0
-                k = self.board[y + i, x - i]
-                self.board[y + i, x - i] = 0
-                self.ai_eat(x - i - 1, y + i + 1, ai_bites, n + 1)
-                self.board[y, x] = self.board[y + i + 1, x - i - 1]
-                self.board[y + i, x - i] = k
-                self.board[y + i + 1, x - i - 1] = 0
-        i = 1
-        while x + i < 8 and y - i > -1 and self.board[y - i, x + i] == 0:
-            i += 1
-        if x + i < 7 and y - i > 0 and self.board[y - i, x + i] * self.current_player < 0:
-            if self.board[y - i - 1, x + i + 1] == 0:
-                m = False
-                self.board[y - i - 1, x + i + 1] = self.board[y, x]
-                self.board[y, x] = 0
-                k = self.board[y - i, x + i]
-                self.board[y - i, x + i] = 0
-                self.ai_eat(x + i + 1, y - i - 1, ai_bites, n + 1)
-                self.board[y, x] = self.board[y - i - 1, x + i + 1]
-                self.board[y - i, x + i] = k
-                self.board[y - i - 1, x + i + 1] = 0
-        i = 1
-        while x - i > -1 and y - i > -1 and self.board[y - i, x - i] == 0:
-            i += 1
-        if x - i > 0 and y - i > 0 and self.board[y - i, x - i] * self.current_player < 0:
-            if self.board[y - i - 1, x - i - 1] == 0:
-                m = False
-                self.board[y - i - 1, x - i - 1] = self.board[y, x]
-                self.board[y, x] = 0
-                k = self.board[y - i, x - i]
-                self.board[y - i, x - i] = 0
-                self.ai_eat(x - i - 1, y - i - 1, ai_bites, n + 1)
-                self.board[y, x] = self.board[y - i - 1, x - i - 1]
-                self.board[y - i, x - i] = k
-                self.board[y - i - 1, x - i - 1] = 0
+        mv = [[1, 1], [-1, -1], [-1, 1], [1, -1]]
+        for dx, dy in mv:
+            i = 1
+            while -1 < x + dx*i < 8 and -1 < y + dy*i < 8 and self.board[y + dy*i, x + dx*i] == 0:
+                i += 1
+            if 0 < x + dx*i < 7 and 0 < y + dy*i < 7 and self.board[y + dy*i, x + dx*i] * self.current_player < 0:
+                if self.board[y + dy*(i + 1), x + dx*(i + 1)] == 0:
+                    m = False
+                    self.board[y + dy*(i + 1), x + dx*(i + 1)] = self.board[y, x]
+                    self.board[y, x] = 0
+                    k = self.board[y + dy*i, x + dx*i]
+                    self.board[y + dy*i, x + dx*i] = 0
+                    self.ai_eat(x + dx*(i + 1), y + dy*(i + 1), ai_bites, n + 1)
+                    self.board[y, x] = self.board[y + dy*(i + 1), x + dx*(i + 1)]
+                    self.board[y + dy*i, x + dx*i] = k
+                    self.board[y + dy*i, x + dx*i] = 0
         if m and n > 0:
             ai_bites.append(self.copy())
 
