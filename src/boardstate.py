@@ -10,8 +10,6 @@ desk1 = {0: '0', 1: '1', 2: '2', -1: '3', -2: '4'}
 
 
 class BoardState:
-    moves = []
-    to_eat = [[], [], [], []]
 
     def __init__(self, board: np.ndarray, current_player: int = 1):
         self.board: np.ndarray = board
@@ -48,15 +46,15 @@ class BoardState:
         return BoardState(self.board.copy(), self.current_player)
 
     def get_moves(self, x, y):
-        self.moves = []
-        self.to_eat = [[], [], [], []]
+        moves = []
+        to_eat = [[], [], [], []]
         if abs(self.board[y, x]) == 1:
             mvs = [[0, 2, 2], [1, -2, 2], [2, -2, -2], [3, 2, -2]]
             for k, i, j in mvs:
                 if y + i < 8 and x + j < 8 and self.board[y + i // 2, x + j // 2] \
                         * self.current_player < 0 and self.board[y + i, x + j] == 0:
-                    self.moves.append([y + i, x + j])
-                    self.to_eat[k] = [y + i // 2, x + i // 2]
+                    moves.append([y + i, x + j])
+                    to_eat[k] = [y + i // 2, x + i // 2]
         else:
             mvs = [[0, 1, 1], [1, -1, 1], [2, 1, -1], [3, -1, -1]]
             for k, dx, dy in mvs:
@@ -66,11 +64,12 @@ class BoardState:
                     i += 1
                 if y + i * dy < 7 and x + i * dx < 7 and self.board[y + i * dy, x + i * dx] \
                         * self.current_player < 0 and self.board[y + (i + 1) * dy, x + (i + 1) * dx] == 0:
-                    self.moves.append([y + (i + 1) * dy, x + (i + 1) * dx])
-                    self.to_eat[0] = [y + i * dy, x + i * dx]
+                    moves.append([y + (i + 1) * dy, x + (i + 1) * dx])
+                    to_eat[k] = [y + i * dy, x + i * dx]
+        return moves, to_eat
 
-    def eat_up(self, from_x, from_y, to_x, to_y):
-        if [to_y, to_x] in self.moves:
+    def eat_up(self, from_x, from_y, to_x, to_y, moves, to_eat):
+        if [to_y, to_x] in moves:
             result = self.copy()
             result.board[to_y, to_x] = result.board[from_y, from_x]
             if self.board[from_y, from_x] == WHITE and to_y == 0:
@@ -79,80 +78,75 @@ class BoardState:
                 result.board[to_y, to_x] -= 1
             result.board[from_y, from_x] = 0
             if from_y < to_y and from_x < to_x:
-                result.board[self.to_eat[0][0], self.to_eat[0][1]] = 0
+                result.board[to_eat[0][0], to_eat[0][1]] = 0
             if from_y > to_y and from_x < to_x:
-                result.board[self.to_eat[1][0], self.to_eat[1][1]] = 0
+                result.board[to_eat[1][0], to_eat[1][1]] = 0
             if from_y < to_y and from_x > to_x:
-                result.board[self.to_eat[3][0], self.to_eat[3][1]] = 0
+                result.board[to_eat[3][0], to_eat[3][1]] = 0
             if from_y > to_y and from_x > to_x:
-                result.board[self.to_eat[2][0], self.to_eat[2][1]] = 0
+                result.board[to_eat[2][0], to_eat[2][1]] = 0
             return result
         else:
             return None
 
-    def do_move(self, from_x, from_y, to_x, to_y) -> Optional['BoardState']:
-
-        if from_x == to_x and from_y == to_y:
-            return None  # invalid move
-
-        if (to_x + to_y) % 2 == 0:
-            return None
-
-        if self.board[to_y, to_x] != 0:
-            return None
-
-        if self.board[from_y, from_x] == WDAME or self.board[from_y, from_x] == BDAME:
-            result = self.copy()
-            dx = 1 if to_x > from_x else -1
-            dy = 1 if to_y > from_y else -1
-            x, y = from_x, from_y
-            while x != to_x:
-                x += dx
-                y += dy
-                if self.board[y, x] != 0:
-                    return None
-            result.board[to_y, to_x] = result.board[from_y, from_x]
-            result.board[from_y, from_x] = 0
-        else:
-            if self.board[from_y, from_x] == WHITE and self.current_player == 1:
-                if to_y == from_y - 1 and abs(to_x - from_x) <= 1:
-                    result = self.copy()
-                    result.board[to_y, to_x] = result.board[from_y, from_x]
-                    if to_y == 0:
-                        result.board[to_y, to_x] += 1
-                    result.board[from_y, from_x] = 0
-                else:
-                    return None
-            elif self.board[from_y, from_x] == BLACK and self.current_player == -1:
-                if to_y == from_y + 1 and abs(to_x - from_x) <= 1:
-                    result = self.copy()
-                    result.board[to_y, to_x] = result.board[from_y, from_x]
-                    if to_y == 7:
-                        result.board[to_y, to_x] -= 1
-                    result.board[from_y, from_x] = 0
-                else:
-                    return None
-            else:
+    def do_move_dame(self, from_x, from_y, to_x, to_y):
+        result = self.copy()
+        dx = 1 if to_x > from_x else -1
+        dy = 1 if to_y > from_y else -1
+        x, y = from_x, from_y
+        while x != to_x:
+            x += dx
+            y += dy
+            if self.board[y, x] != 0:
                 return None
+        result.board[to_y, to_x] = result.board[from_y, from_x]
+        result.board[from_y, from_x] = 0
         return result
 
-    def move_white(self, x, y, just_moves):
-        for dx in (-1, 1):
-            if 8 > x + dx > -1 and y - 1 > -1 and self.board[y - 1, x + dx] == 0:
-                state = self.copy()
-                state.board[y - 1, x + dx] = state.board[y, x]
-                if y == 1:
-                    state.board[y - 1, x + dx] += 1
-                state.board[y, x] = 0
-                just_moves.append(state)
+    def do_move_usual(self, from_x, from_y, to_x, to_y):
+        if self.board[from_y, from_x] == WHITE and self.current_player == 1:
+            if to_y == from_y - 1 and abs(to_x - from_x) <= 1:
+                result = self.copy()
+                result.board[to_y, to_x] = result.board[from_y, from_x]
+                if to_y == 0:
+                    result.board[to_y, to_x] += 1
+                result.board[from_y, from_x] = 0
+            else:
+                return None
+        elif self.board[from_y, from_x] == BLACK and self.current_player == -1:
+            if to_y == from_y + 1 and abs(to_x - from_x) <= 1:
+                result = self.copy()
+                result.board[to_y, to_x] = result.board[from_y, from_x]
+                if to_y == 7:
+                    result.board[to_y, to_x] -= 1
+                result.board[from_y, from_x] = 0
+            else:
+                return None
+        else:
+            return None
+        return result
 
-    def move_black(self, x, y, just_moves):
-        for dx in (-1, 1):
-            if 8 > x + dx > -1 and y + 1 < 8 and self.board[y + 1, x + dx] == 0:
+    def do_move(self, from_x, from_y, to_x, to_y) -> Optional['BoardState']:
+        if from_x == to_x and from_y == to_y:
+            return None  # invalid move
+        if (to_x + to_y) % 2 == 0:
+            return None
+        if self.board[to_y, to_x] != 0:
+            return None
+        if self.board[from_y, from_x] == WDAME or self.board[from_y, from_x] == BDAME:
+            return self.do_move_dame(from_x, from_y, to_x, to_y)
+        else:
+            return self.do_move_usual(from_x, from_y, to_x, to_y)
+
+    def move_with_usual(self, x, y, just_moves, is_white):
+        dy = -1 if is_white else 1
+        mvx = [1, -1]
+        for dx in mvx:
+            if 8 > x + dx > -1 and 8 > y + dy > -1 and self.board[y - 1, x + dx] == 0:
                 state = self.copy()
-                state.board[y + 1, x + dx] = state.board[y, x]
-                if y == 6:
-                    state.board[y + 1, x + dx] += 1
+                state.board[y + dy, x + dx] = state.board[y, x]
+                if y == 1:
+                    state.board[y + dy, x + dx] += 1
                 state.board[y, x] = 0
                 just_moves.append(state)
 
@@ -172,9 +166,9 @@ class BoardState:
     def ai_move(self, x, y):
         just_moves = []
         if self.board[y, x] == BLACK and self.current_player == -1:
-            self.move_black(x, y, just_moves)
+            self.move_with_usual(x, y, just_moves, False)
         if self.board[y, x] == WHITE and self.current_player == 1:
-            self.move_white(x, y, just_moves)
+            self.move_with_usual(x, y, just_moves, True)
         if (self.board[y, x] == WDAME and self.current_player == 1) or (
                 self.board[y, x] == BDAME and self.current_player == -1):
             self.move_with_dame(x, y, just_moves)
